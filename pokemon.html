@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pokémon SV Monotype Challenge : Classement des Dresseurs</title>
+
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0 auto; 
+      background-color: #e8f5e9;
+      width: 50%;
+    }
+    h1 { 
+      text-align: center; 
+      color: #9f3333;
+    }
+    table { 
+      width: 80%; 
+      margin: 20px auto; 
+      border-collapse: collapse; 
+      background: white; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td { 
+      padding: 10px; 
+      border: 1px solid #ccc; 
+      text-align: center;
+    }
+    th { background-color: #9f3333; color:#f7f7f7;}
+    tr:nth-child(even) { background-color: #f1f8e9; }
+
+    /* Couleurs des top 3 */
+    .gold   { background-color: #FFD700; font-weight: 600;}
+    .silver { background-color: #C0C0C0; font-weight: 600;}
+    .bronze { background-color: #CD7F32; font-weight: 600;}
+  </style>
+</head>
+<body>
+  <h1>Pokémon SV Monotype Challenge : Classement des Dresseurs</h1>
+
+  <table id="scoreTable">
+    <thead>
+      <tr>
+        <th>Rang</th>
+        <th>Dresseur</th>
+        <th>Type</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Remplace cette URL par ton API SheetDB
+    const apiURL = "https://sheetdb.io/api/v1/ahh794rl3uxr4";
+
+    fetch(apiURL)
+      .then(res => res.json())
+      .then(data => {
+        // Trie les scores dans l’ordre décroissant
+        data.sort((a, b) => Number(b.Score) - Number(a.Score));
+        
+        const tbody = document.querySelector("#scoreTable tbody");
+        tbody.innerHTML = "";
+
+        let currentRank = 0;
+        let lastScore = null;
+        let actualPosition = 0;
+
+        data.forEach((row) => {
+          actualPosition++; // position réelle dans la liste triée
+          
+          // Si le score est différent du précédent, on incrémente le rang
+          if (row.Score !== lastScore) {
+            currentRank = actualPosition;
+            lastScore = row.Score;
+          }
+
+          const tr = document.createElement("tr");
+
+          // Attribution des couleurs pour les 3 premiers rangs
+          let rankClass = "";
+          if (currentRank === 1) rankClass = "gold";
+          else if (currentRank === 2) rankClass = "silver";
+          else if (currentRank === 3) rankClass = "bronze";
+
+          tr.innerHTML = `
+            <td class="${rankClass}">${currentRank}</td>
+            <td>${row.Dresseur || ""}</td>
+            <td>${row.Type || ""}</td>
+            <td>${row.Score || ""}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        console.error("Erreur lors du chargement :", err);
+        document.querySelector("#scoreTable tbody").innerHTML = 
+          `<tr><td colspan="4">Erreur de chargement des données</td></tr>`;
+      });
+  </script>
+</body>
+</html>
